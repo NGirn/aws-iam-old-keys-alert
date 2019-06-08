@@ -5,15 +5,17 @@ const ARN = 'arn:aws:sns:us-east-1:317241229763:oldAccessKeyAlert';
 var TTL = 10;
 var REGION_NAME = 'us-east-1';
 
-
+// This runs when event is triggered
 exports.handler = async (event) => {
     return getOldKeys(TTL);
 };
 
+// Function to convert date format into unix timestamp
 function toTimestamp(strDate){
     var datum = Date.parse(strDate);
     return datum/1000;
 }
+
 
 function getOldKeys(TTL){
     // Get the list of users
@@ -28,6 +30,7 @@ function getOldKeys(TTL){
     
     oldKeyUsers = [];
 
+    // Iterate through list of users to access each users' data
     for (u in users) {
         var params = {
             UserName: u
@@ -54,22 +57,32 @@ function getOldKeys(TTL){
              }
              */
            });
-
+        
+        // Scan each users' data to see when their keys were created
         for (key in accessKey['AccessKeyMetadata']){
             tsKey = toTimestamp(key['CreateDate']);
+
+            // Creates todays' date in a unix timestamp format
             var today = new Date();
             var dd = String(today.getDate()).padStart(2, '0');
             var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
             var yyyy = today.getFullYear();
 
             today = mm + '/' + dd + '/' + yyyy;
-            tsToday = toTimestamp(today);
-            if (tsKey <=  tsToday) {
-                oldKeyUsers.push(UserName);
+            var tsToday = toTimestamp(today);
+            var threshold = tsToday - (TTL*86400) 
+
+            // Compares timestamps for when the keys were created and today's timestamp minus the required TTL (time to live) of the access key
+            if (tsKey <=  threshold) {
+                var metadata = accessKey['AccessKeyMetaData']
+                // Adds user to a list of users required to rotate their access keys
+                oldKeyUsers.push(metadata['UserName']);
+
             }
        }
     }
 
+    // Sending an SNS push notifcation of all users in the list that are required to rotate thier access keys
     var sns = new AWS.SNS();
     var params = {
         Message: oldKeyUsers, /* required */
