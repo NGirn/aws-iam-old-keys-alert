@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const ARN = 'arn:aws:sns:us-east-1:317241229763:oldAccessKeyAlert';
 
 // Global Variables
-var TTL = 10;
+var TTL = 10; // In days
 var REGION_NAME = 'us-east-1';
 
 // This runs when event is triggered
