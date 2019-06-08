@@ -1,9 +1,9 @@
-const log = console.log;
 const AWS = require('aws-sdk');
+const ARN = 'arn:aws:sns:us-east-1:317241229763:oldAccessKeyAlert';
 
 // Global Variables
-var TTL = 10
-var REGION_NAME = 'us-east-1'
+var TTL = 10;
+var REGION_NAME = 'us-east-1';
 
 
 exports.handler = async (event) => {
@@ -12,7 +12,7 @@ exports.handler = async (event) => {
 
 function toTimestamp(strDate){
     var datum = Date.parse(strDate);
-    return datum/1000
+    return datum/1000;
 }
 
 function getOldKeys(TTL){
@@ -65,10 +65,28 @@ function getOldKeys(TTL){
             today = mm + '/' + dd + '/' + yyyy;
             tsToday = toTimestamp(today);
             if (tsKey <=  tsToday) {
-                
-
+                oldKeyUsers.push(UserName);
             }
        }
     }
-    
+
+    var sns = new AWS.SNS();
+    var params = {
+        Message: oldKeyUsers, /* required */
+        MessageAttributes: {
+          '<String>': {
+            DataType: 'String.Array', /* required */
+          },
+          /* '<String>': ... */
+        },
+        Subject: 'Users That Are Required To Change Their Access Keys',
+        TargetArn: ARN,
+        TopicArn: ARN
+      };
+    sns.publish(params, function(err, data) {
+        if (err) console.log(err, err.stack); // an error occurred
+        else     console.log(data);           // successful response
+    });
+
+    return oldKeyUsers;    
 }
