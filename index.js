@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const ARN = 'arn:aws:sns:us-east-1:317241229763:oldAccessKeyAlert';
+const ARN = '';
 
 // Global Variables
 var TTL = 10; // In days
