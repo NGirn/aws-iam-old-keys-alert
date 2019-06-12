@@ -28,14 +28,14 @@ function getOldKeys(TTL){
         else     console.log(data);           // successful response
       });
     
-    oldKeyUsers = [];
+    var oldKeyUsers = [];
 
     // Iterate through list of users to access each users' data
     for (u in users) {
         var params = {
             UserName: u
            };
-           accessKey = iam.listAccessKeys(params, function(err, data) {
+           var accessKey = iam.listAccessKeys(params, function(err, data) {
              if (err) console.log(err, err.stack); // an error occurred
              else     console.log(data);           // successful response
              /*
