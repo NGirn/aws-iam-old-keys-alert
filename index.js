@@ -21,9 +21,10 @@ function getOldKeys(TTL){
     // Get the list of users
     var iam = new AWS.IAM();
     var params = {
-        GroupName: 'None'
+        GroupName: 'testGroup'
       };
-    var users = iam.getGroup(params, function(err, data) {
+    var users = [];
+    users = iam.getGroup(params, function(err, data) {
         if (err) console.log(err, err.stack); // an error occurred
         else     console.log(data);           // successful response
       });
@@ -31,22 +32,25 @@ function getOldKeys(TTL){
     var oldKeyUsers = [];
 
     // Iterate through list of users to access each users' data
-    for (u in users) {
+    var arrayLength = users.length;
+    console.log(arrayLength);
+    for (var i = 0; i < arrayLength; i++) {
         var params = {
-            UserName: u
+            UserName: users[i]
            };
-           var accessKey = iam.listAccessKeys(params, function(err, data) {
-             if (err) console.log(err, err.stack); // an error occurred
-             else     console.log(data);           // successful response
-             /*
-             data = {
-              AccessKeyMetadata: [
-                 {
+        var accessKey = [];
+        var accessKeyData = iam.listAccessKeys(params, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else     console.log(data);           // successful response
+            /*
+            data = {
+             AccessKeyMetadata: [
+            {
                 AccessKeyId: "AKIA111111111EXAMPLE", 
                 CreateDate: <Date Representation>, 
                 Status: "Active", 
                 UserName: "Alice"
-               }, 
+            }, 
                  {
                 AccessKeyId: "AKIA222222222EXAMPLE", 
                 CreateDate: <Date Representation>, 
@@ -57,28 +61,26 @@ function getOldKeys(TTL){
              }
              */
            });
+        var tsKey;
+        tsKey = accessKeyData.AccessKeyMetadata.CreateDate;
+        tsKey = toTimestamp(tsKey);
         
-        // Scan each users' data to see when their keys were created
-        for (key in accessKey['AccessKeyMetadata']){
-            tsKey = toTimestamp(key['CreateDate']);
+        // Creates todays' date in a unix timestamp format
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
 
-            // Creates todays' date in a unix timestamp format
-            var today = new Date();
-            var dd = String(today.getDate()).padStart(2, '0');
-            var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-            var yyyy = today.getFullYear();
+        today = mm + '/' + dd + '/' + yyyy;
+        var tsToday = toTimestamp(today);
+        var threshold = tsToday - (TTL*86400) 
 
-            today = mm + '/' + dd + '/' + yyyy;
-            var tsToday = toTimestamp(today);
-            var threshold = tsToday - (TTL*86400) 
-
-            // Compares timestamps for when the keys were created and today's timestamp minus the required TTL (time to live) of the access key
-            if (tsKey <=  threshold) {
-                var metadata = accessKey['AccessKeyMetaData']
-                // Adds user to a list of users required to rotate their access keys
-                oldKeyUsers.push(metadata['UserName']);
-
-            }
+        // Compares timestamps for when the keys were created and today's timestamp minus the required TTL (time to live) of the access key
+        if (tsKey <=  threshold) {
+            // Adds user to a list of users required to rotate their access keys
+            var username;
+            username = accessKeyData.AccessKeyMetadata.UserName;
+            oldKeyUsers.push(username);
        }
     }
 
