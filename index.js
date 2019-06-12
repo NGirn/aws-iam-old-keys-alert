@@ -6,7 +6,7 @@ var REGION_NAME = 'us-east-1';
 
 // This runs when event is triggered
 exports.handler = async (event) => {
-    return getOldKeys(TTL);
+    getOldKeys(TTL);
 };
 
 // Function to convert date format into unix timestamp
@@ -20,9 +20,8 @@ function getOldKeys(TTL){
     // Get the list of users
     var iam = new AWS.IAM();
     var params = {
-        GroupName: 'testGroup'
       };
-    var users = iam.getGroup(params, function(err, data) {
+    var users = iam.listUsers(params, function(err, data) {
         if (err) console.log(err, err.stack); // an error occurred
         else     console.log(data);           // successful response
       });
