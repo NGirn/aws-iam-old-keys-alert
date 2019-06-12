@@ -1,8 +1,7 @@
-const AWS = require('aws-sdk');
-const ARN = '';
-
 // Global Variables
-var TTL = 10; // In days
+const AWS = require('aws-sdk');
+const ARN = 'arn:aws:sns:us-east-1:317241229763:oldAccessKeyAlert';
+var TTL = 1; // In days
 var REGION_NAME = 'us-east-1';
 
 // This runs when event is triggered
@@ -23,8 +22,7 @@ function getOldKeys(TTL){
     var params = {
         GroupName: 'testGroup'
       };
-    var users = [];
-    users = iam.getGroup(params, function(err, data) {
+    var users = iam.getGroup(params, function(err, data) {
         if (err) console.log(err, err.stack); // an error occurred
         else     console.log(data);           // successful response
       });
@@ -33,7 +31,6 @@ function getOldKeys(TTL){
 
     // Iterate through list of users to access each users' data
     var arrayLength = users.length;
-    console.log(arrayLength);
     for (var i = 0; i < arrayLength; i++) {
         var params = {
             UserName: users[i]
@@ -87,7 +84,7 @@ function getOldKeys(TTL){
     // Sending an SNS push notifcation of all users in the list that are required to rotate thier access keys
     var sns = new AWS.SNS();
     var params = {
-        Message: oldKeyUsers, /* required */
+        Message: 'oldKeyUsers', /* required */
         MessageAttributes: {
           '<String>': {
             DataType: 'String.Array', /* required */
