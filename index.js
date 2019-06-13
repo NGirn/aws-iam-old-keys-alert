@@ -91,7 +91,6 @@ function getOldKeys(TTL){
           /* '<String>': ... */
         },
         Subject: 'Users That Are Required To Change Their Access Keys',
-        TargetArn: ARN,
         TopicArn: ARN
       };
     sns.publish(params, function(err, data) {
