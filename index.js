@@ -5,7 +5,7 @@ const AWS = require('aws-sdk');
 const TTL = 1;
 const ARN = '';
 
-module.exports.hello = async (event) => {
+exports.handler = async (event) => {
   await getOldKeys();
   };
 
