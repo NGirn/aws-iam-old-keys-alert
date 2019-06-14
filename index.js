@@ -6,26 +6,24 @@ var REGION_NAME = 'us-east-1';
 
 // This runs when event is triggered
 exports.handler = async (event) => {
-    getOldKeys(TTL);
+    await getOldKeys();
 };
 
 // Function to convert date format into unix timestamp
-function toTimestamp(strDate){
+async function toTimestamp(strDate){
     var datum = Date.parse(strDate);
     return datum/1000;
 }
 
 
-function getOldKeys(TTL){
+async function getOldKeys(){
     // Get the list of users
-    var iam = new AWS.IAM();
+    var iam = await new AWS.IAM();
     var params = {
       };
-    var users = iam.listUsers(params, function(err, data) {
-        if (err) console.log(err, err.stack); // an error occurred
-        else     console.log(data);           // successful response
-      });
+    var users = await iam.listUsers(params);
     
+    console.log(users);
     var oldKeyUsers = [];
 
     // Iterate through list of users to access each users' data
@@ -35,7 +33,7 @@ function getOldKeys(TTL){
             UserName: users[i]
            };
         var accessKey = [];
-        var accessKeyData = iam.listAccessKeys(params, function(err, data) {
+        var accessKeyData = await iam.listAccessKeys(params, function(err, data) {
             if (err) console.log(err, err.stack); // an error occurred
             else     console.log(data);           // successful response
             /*
@@ -93,7 +91,7 @@ function getOldKeys(TTL){
         Subject: 'Users That Are Required To Change Their Access Keys',
         TopicArn: ARN
       };
-    sns.publish(params, function(err, data) {
+    await sns.publish(params, function(err, data) {
         if (err) console.log(err, err.stack); // an error occurred
         else     console.log(data);           // successful response
     });
