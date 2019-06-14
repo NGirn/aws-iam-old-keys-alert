@@ -1,0 +1,104 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "s3serverlessiamkeysalertdserverlessdeploymentbuck1cju0j7je1um6": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        },
+        "Tags": [
+          {
+            "Key": "STAGE",
+            "Value": "dev"
+          }
+        ]
+      }
+    },
+    "topicoldAccessKeyAlert": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "oldAccessKeyAlert",
+        "Subscription": [
+          {
+            "Endpoint": "navdeepsinghgirn@gmail.com",
+            "Protocol": "email"
+          }
+        ]
+      }
+    },
+    "sgIAMOldKeyAlertStackWebServerSecurityGroup15GBJA9AXVEHS": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable HTTPS access via port 443",
+        "VpcId": "vpc-025da25afd02b8c16"
+      }
+    },
+    "snspolicyoldAccessKeyAlert": {
+      "Type": "AWS::SNS::TopicPolicy",
+      "Properties": {
+        "Topics": [
+          {
+            "Ref": "topicoldAccessKeyAlert"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2008-10-17",
+          "Id": "__default_policy_ID",
+          "Statement": [
+            {
+              "Sid": "__default_statement_ID",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": [
+                "SNS:GetTopicAttributes",
+                "SNS:SetTopicAttributes",
+                "SNS:AddPermission",
+                "SNS:RemovePermission",
+                "SNS:DeleteTopic",
+                "SNS:Subscribe",
+                "SNS:ListSubscriptionsByTopic",
+                "SNS:Publish",
+                "SNS:Receive"
+              ],
+              "Resource": {
+                "Ref": "topicoldAccessKeyAlert"
+              },
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceOwner": "317241229763"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ingress1": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgIAMOldKeyAlertStackWebServerSecurityGroup15GBJA9AXVEHS"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "443",
+        "ToPort": "443",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress1": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgIAMOldKeyAlertStackWebServerSecurityGroup15GBJA9AXVEHS"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    }
+  },
+  "Description": "AWS CloudFormation template of automatic serverless old IAM User Access Key alerts "
+}
