@@ -1,0 +1,36 @@
+service: ServerlessIAMKeysAlert # NOTE: update this with your service name
+#app: your-app-name
+#tenant: your-tenant-name
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+
+# you can overwrite defaults here
+  stage: dev
+  region: us-east-1
+
+# you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "iam:GenerateCredentialReport"
+        - "iam:GenerateServiceLastAccessedDetails"
+        - "iam:Get*"
+        - "iam:List*"
+        - "iam:SimulateCustomPolicy"
+        - "iam:SimulatePrincipalPolicy"
+        - "sns:*"
+      Resource: "*"
+
+# you can define service wide environment variables here
+  environment:
+    ARN: arn:aws:sns:us-east-1:317241229763:oldAccessKeyAlert
+    TTL: 1
+
+functions:
+  hello:
+    handler: handler.hello
+
+    events:
+      - schedule: rate(5 minutes)
