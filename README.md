@@ -1,6 +1,6 @@
 # AWS IAM Old Key Alert
 
-This scans users created by IAM for the dates when their public access keys were created. It then checks to see how old they are. If they are older than a certain age (in days), SNS sends a push notification to all subscription methods. The notification will contain a list of all the users that are required to rotate their public access keys.
+This scans users in your AWS account for the dates when their public access keys were created. It then checks to see how old they are. If they are older than a certain age (in days), SNS sends a push notification to all your subscription methods. The notification will contain a list of all the users that are required to rotate their public access keys.
 
 The architecture is as follows:
 
